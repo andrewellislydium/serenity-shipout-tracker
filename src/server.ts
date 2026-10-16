@@ -3,26 +3,18 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
 import cookieParser from 'cookie-parser';
-import { authRoutes, checkAuthConfig, getRole, requireRole } from './auth.js';
-import { createStore } from './store/index.js';
+import { authRoutes, getRole, requireRole } from './auth.js';
+import type { Store } from './store/index.js';
+import { startStore, status } from './startup.js';
 import { ConflictError, NOTE_MAX, NotFoundError, ValidationError, isDate, normalizeBackup, validateTask } from './model.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 if (fs.existsSync(path.join(ROOT, '.env'))) process.loadEnvFile(path.join(ROOT, '.env'));
 
-checkAuthConfig();
-const store = createStore();
-await store.init();
-
-// First start with an empty store: load the seed dataset.
-if (await store.isEmpty()) {
-  const seed = path.join(ROOT, 'data', 'tracker-state.json');
-  if (fs.existsSync(seed)) {
-    const b = normalizeBackup(JSON.parse(fs.readFileSync(seed, 'utf8')));
-    await store.importAll(b);
-    console.log(`Empty store: imported ${b.tasks.length} tasks from data/tracker-state.json`);
-  }
-}
+// Settings and storage are checked in the background after the server starts listening,
+// so a problem shows as a clear message instead of a crash loop.
+let store!: Store;
+startStore(ROOT).then(s => { if (s) store = s; });
 
 const app = express();
 app.set('trust proxy', 1);
@@ -46,7 +38,22 @@ app.use((_req, res, next) => {
   next();
 });
 
-app.get('/healthz', (_req, res) => { res.status(200).send('ok'); });
+app.get('/healthz', (_req, res) => {
+  if (status.ready) res.status(200).send('ok');
+  else res.status(503).send(status.problem);
+});
+
+// Until settings and storage are good, every other request gets the reason.
+app.use((req, res, next) => {
+  if (status.ready) { next(); return; }
+  res.status(503).set('Retry-After', '15');
+  if (!req.path.startsWith('/api/') && req.accepts(['html', 'json']) === 'html') {
+    const e = (s: string) => s.replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
+    res.type('html').send(`<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Ship-out readiness tracker</title><meta http-equiv="refresh" content="15"></head><body style="font-family:Arial,sans-serif;color:#4D4D4A;background:#f0eeec;padding:24px"><div style="max-width:560px;margin:8vh auto;background:#fff;border-top:4px solid #731F60;padding:20px 24px"><h1 style="color:#731F60;font-size:20px;margin:0 0 10px">The tracker is not available yet</h1><p style="line-height:1.5">${e(status.problem)}</p><p style="color:#74736E;font-size:13px">This page checks again every 15 seconds.</p></div></body></html>`);
+  } else {
+    res.json({ error: status.problem });
+  }
+});
 
 // Public: login page and brand assets.
 const PUBLIC = path.join(ROOT, 'public');
