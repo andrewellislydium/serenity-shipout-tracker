@@ -4,7 +4,7 @@
 
 import crypto from 'node:crypto';
 import express from 'express';
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 
 export type Role = 'editor' | 'viewer';
 
@@ -54,12 +54,25 @@ export const requireRole = (min: Role): express.RequestHandler => (req, res, nex
   next();
 };
 
+/**
+ * Client IP without a port. App Service's front end puts "ip:port" in X-Forwarded-For,
+ * which would give every attempt a fresh rate-limit key.
+ */
+export function clientIp(req: express.Request) {
+  const ip = req.ip || req.socket.remoteAddress || '';
+  const v6 = ip.match(/^\[([^\]]+)\](?::\d+)?$/);
+  if (v6) return v6[1];
+  const v4 = ip.match(/^(\d{1,3}(?:\.\d{1,3}){3}):\d+$/);
+  return v4 ? v4[1] : ip;
+}
+
 export function authRoutes(app: express.Express) {
   // Five failed attempts per minute per client, then blocked until the window resets.
   const limiter = rateLimit({
     windowMs: 60_000,
     limit: 5,
     skipSuccessfulRequests: true,
+    keyGenerator: req => ipKeyGenerator(clientIp(req)),
     standardHeaders: 'draft-8',
     legacyHeaders: false,
     message: { error: 'Too many attempts. Wait a minute and try again.' },

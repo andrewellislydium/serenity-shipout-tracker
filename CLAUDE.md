@@ -6,4 +6,6 @@ Ship-out readiness tracker for Serenity Power (client facing, maintained by Lydi
 - The API only talks to storage through the Store interface in src/store/types.ts. Keep it that way so the Azure adapter can drop in.
 - All writes are editor only, enforced on the server with requireRole('editor').
 - Local dev: `npm run dev` on port 5190. Live data is in data/tracker.json (git ignored); delete it to reseed from data/tracker-state.json.
-- Status: local app complete (milestones 1 to 7). Azure hosting and storage (milestone 8) not started.
+- STORE=table is the Azure Table Storage adapter (managed identity in Azure, Azurite locally via AZURE_STORAGE_CONNECTION_STRING=UseDevelopmentStorage=true).
+- Runtime target is Node 24 LTS (SPEC says 20, which is end of life). Keep code compatible with 20.12+.
+- Status: milestones 1 to 7 done; table adapter done; Azure App Service setup in progress via the portal.

@@ -4,7 +4,7 @@ Serenity Power project tracker, maintained by Lydium Technical Services. Built f
 
 ## Run locally
 
-Needs Node 20.12 or later.
+Needs Node 20.12 or later (Node 24 LTS recommended).
 
 ```bash
 npm install
@@ -25,7 +25,7 @@ Production-style run: `npm run build && npm start`.
 | `src/server.ts` | Express app: login, JSON API (SPEC section 5), static files, `/healthz` |
 | `src/auth.ts` | Passcode login, signed session cookie, `getRole` and `requireRole` (SPEC 3.1) |
 | `src/model.ts` | Task validation and backup normalisation (SPEC 4) |
-| `src/store/` | `Store` interface and the `file` adapter (SPEC 2.2). Azure adapters go here. |
+| `src/store/` | `Store` interface (SPEC 2.2), the `file` adapter for local use and the `table` adapter for Azure Table Storage |
 | `public/index.html` | Page shell |
 | `public/js/core.js` | Stages, date helpers, derived data and HTML renderers (ported from the reference) |
 | `public/js/app.js` | Page controller: sync, write queue, events, dialog, print, downloads |
@@ -36,7 +36,23 @@ Production-style run: `npm run build && npm start`.
 
 Each change is its own API call (tick, status, edit, delete, note, ship date), sent in order from a client-side queue. Network or server errors retry with backoff and the header shows "Not saved, retrying". Each task carries an `updatedAt` token: if two people edit the same task, the second save gets a 409, the page reloads that person's view from the server, and they are told to redo their change. Day notes save 500 ms after typing stops, last write wins per date. Pages poll `GET /api/state` every 10 s.
 
+## Storage
+
+| `STORE` | Where data lives | Use for |
+|---|---|---|
+| `file` (default) | `DATA_DIR/tracker.json` | Local development |
+| `table` | Azure Table Storage: tables `tasks`, `daynotes`, `settings` | Azure |
+
+With `STORE=table` the app creates the three tables on first start and, if they are empty, loads `data/tracker-state.json`. In Azure it signs in with the web app's managed identity (`STORAGE_ACCOUNT` names the account; the identity needs the **Storage Table Data Contributor** role). Each task's ETag is its concurrency token.
+
+To try the table adapter locally, run the [Azurite](https://learn.microsoft.com/azure/storage/common/storage-use-azurite) emulator (`npx azurite-table`) and start the app with `STORE=table AZURE_STORAGE_CONNECTION_STRING=UseDevelopmentStorage=true`.
+
+## Hosting on Azure App Service
+
+Linux web app, Node 24 LTS, Canada Central, Basic B1 or higher with Always On and HTTPS only. App settings: `STORE=table`, `STORAGE_ACCOUNT`, `EDITOR_TOKEN`, `VIEWER_TOKEN`, `SESSION_SECRET`. App Service runs `npm start` (the compiled `dist/server.js`); the GitHub Actions workflow from Deployment Center runs `npm run build`. Health check path: `/healthz`.
+
+Note: SPEC.md says Node 20 LTS, which reached end of life in April 2026, so the app targets Node 24 LTS. It still runs on 20.12+.
+
 ## Not done yet
 
-- Azure: Table Storage adapter with managed identity, App Service config, deployment (SPEC 2, milestone 8).
 - Entra ID sign-in (SPEC 3.2).

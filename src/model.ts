@@ -85,7 +85,8 @@ export function normalizeBackup(d: any): BackupFile {
     for (const t of d.tasks) {
       if (!t || !t.id || !isDate(t.start) || !isDate(t.end)) continue;
       const id = String(t.id);
-      if (seen.has(id)) continue;
+      // Ids become Table Storage row keys, which cannot contain / \ # ? or control characters.
+      if (seen.has(id) || id.length > 200 || /[/\\#?\u0000-\u001f\u007f]/.test(id)) continue;
       seen.add(id);
       const status: Status = STATUS_IDS.includes(t.status) ? t.status : 'todo';
       out.tasks.push({
