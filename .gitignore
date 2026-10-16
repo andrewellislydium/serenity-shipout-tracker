@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.env
+# Live local data written by the file store (the seed in data/tracker-state.json is tracked)
+data/tracker.json
+data/*.tmp

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in · Ship-out readiness tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="icon" href="/assets/lydium-logo-colour.png">
+<style>
+:root{--P:#731F60;--V:#C6168D;--G:#FDB913;--B:#A36B37;--grey:#4D4D4A;--mid:#74736E}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f0eeec;padding:20px;font-family:'Source Sans 3','Source Sans Pro',Arial,sans-serif;font-size:14px;color:var(--grey);min-height:100vh;display:flex;align-items:flex-start;justify-content:center}
+.card{background:#fff;width:100%;max-width:420px;margin-top:8vh}
+.hdr{background:var(--P);color:#fff;padding:18px 24px}
+.eyebrow{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--G);font-weight:600}
+.title{font-size:22px;font-weight:700;margin-top:4px;line-height:1.15}
+form{padding:22px 24px 8px;display:flex;flex-direction:column;gap:8px}
+label{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--mid);font-weight:700}
+input{font-family:inherit;font-size:15px;border:1px solid #C0BDBA;border-radius:3px;padding:8px 10px;width:100%}
+input:focus{border-color:var(--P)}
+:focus-visible{outline:2px solid var(--G);outline-offset:2px}
+button{font-family:inherit;font-size:14px;font-weight:600;background:var(--P);color:#fff;border:1.5px solid var(--P);border-radius:3px;padding:9px 14px;cursor:pointer;margin-top:6px}
+button:hover{background:#5d194d}
+button:disabled{opacity:.6;cursor:default}
+.err{color:#8f1064;font-weight:600;min-height:20px;font-size:13px}
+.foot{display:flex;justify-content:space-between;align-items:center;padding:14px 24px 22px;border-top:1px solid #e3dfdc;margin-top:12px;font-size:11px;color:var(--mid)}
+.foot img{width:120px;height:auto;display:block}
+</style>
+</head>
+<body>
+<main class="card">
+  <div class="hdr">
+    <div class="eyebrow">Serenity Power · Global Controls, Calgary</div>
+    <h1 class="title">Ship-out readiness tracker</h1>
+  </div>
+  <form id="f" novalidate>
+    <label for="pc">Passcode</label>
+    <input id="pc" name="passcode" type="password" autocomplete="current-password" required autofocus>
+    <div class="err" id="err" role="alert"></div>
+    <button type="submit" id="go">Sign in</button>
+  </form>
+  <div class="foot"><span>Maintained by Lydium Technical Services</span><img src="/assets/lydium-logo-colour.png" alt="Lydium"></div>
+</main>
+<script src="/login.js"></script>
+</body>
+</html>

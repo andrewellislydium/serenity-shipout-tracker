@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ship-out readiness tracker · Serenity Power</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="icon" href="/assets/lydium-logo-colour.png">
+<style id="app-css"></style>
+</head>
+<body>
+<div id="app">
+  <header id="hdr" class="hdr">
+    <div class="hdr-l">
+      <div class="hdr-eyebrow">Serenity Power · Global Controls, Calgary</div>
+      <h1 class="hdr-title">Ship-out readiness tracker</h1>
+      <div class="hdr-sub">Stages 3A, 3B, 4 and 5, through to unit ship-out</div>
+    </div>
+    <div class="hdr-r">
+      <div class="ship-box">
+        <label for="shipDate">Target ship date</label>
+        <input type="date" id="shipDate">
+        <div class="ship-note">Target, pending Italgas proposal acceptance</div>
+      </div>
+      <div class="hdr-meta">
+        <div class="sync-row noprint">
+          <span id="syncState" class="sync" role="status" aria-live="polite">Loading</span>
+          <button class="signout noprint" id="btnSignOut">Sign out</button>
+        </div>
+        <img class="hdr-logo" alt="Lydium" src="/assets/lydium-logo-colour.png">
+      </div>
+    </div>
+  </header>
+
+  <nav id="tabs" class="tabs noprint" aria-label="Views">
+    <button class="tab on" data-view="schedule">Schedule<span class="lg"> dashboard</span></button>
+    <button class="tab" data-view="tasks">Tasks</button>
+    <button class="tab" data-view="daily">Daily<span class="lg"> goals</span></button>
+    <span class="tab-sp"></span>
+    <button class="btn ghost" id="btnExport">Export backup</button>
+    <button class="btn ghost edit-only" id="btnImport">Import backup</button>
+    <input type="file" id="fileImport" accept="application/json,.json" hidden>
+  </nav>
+
+  <section id="view-schedule" class="view">
+    <div class="vtools noprint">
+      <button class="btn" id="btnPrintSched">Print schedule</button>
+      <button class="btn ghost" id="btnDlSched">Download schedule (HTML)</button>
+    </div>
+    <div id="schedule"></div>
+  </section>
+
+  <section id="view-tasks" class="view" hidden>
+    <div class="vtools noprint">
+      <button class="btn pri" id="btnAdd">Add task</button>
+      <select id="fStage" aria-label="Stage filter"><option value="">All stages</option></select>
+      <select id="fStatus" aria-label="Status filter"><option value="">All statuses</option><option value="todo">Not started</option><option value="doing">In progress</option><option value="blocked">Blocked</option><option value="done">Done</option></select>
+      <label class="chk"><input type="checkbox" id="fDaily"> On daily summary only</label>
+      <label class="chk"><input type="checkbox" id="fHideDone"> Hide done</label>
+    </div>
+    <div id="tasks"></div>
+  </section>
+
+  <section id="view-daily" class="view" hidden>
+    <div class="vtools dtools noprint">
+      <button class="btn" id="dPrev" aria-label="Previous day">&larr; Previous</button>
+      <input type="date" id="dDate" aria-label="Sheet date">
+      <button class="btn" id="dNext" aria-label="Next day">Next &rarr;</button>
+      <button class="btn ghost" id="dToday">Today</button>
+      <span class="tab-sp"></span>
+      <button class="btn pri" id="btnPrintDaily">Print daily sheet</button>
+      <button class="btn ghost" id="btnDlDaily">Download sheet (HTML)</button>
+    </div>
+    <p class="hint noprint" id="dHint">Tap a box to tick a goal off. Changes save automatically.</p>
+    <div id="sheet"></div>
+  </section>
+  <div class="backup-m noprint"><button class="btn ghost" id="btnExportM">Export backup</button><button class="btn ghost edit-only" id="btnImportM">Import backup</button></div>
+</div>
+
+<dialog id="dlg" aria-labelledby="dlgTitle">
+  <form class="dlg-box" method="dialog" id="dlgForm" novalidate>
+    <h2 class="dlg-title" id="dlgTitle">Task</h2>
+    <div class="fgrid">
+      <label class="f full"><span>Task</span><input type="text" id="fTitle" maxlength="200"></label>
+      <label class="f"><span>Stage</span><select id="fStageSel"></select></label>
+      <label class="f"><span>Status</span><select id="fStatusSel"><option value="todo">Not started</option><option value="doing">In progress</option><option value="blocked">Blocked</option><option value="done">Done</option></select></label>
+      <label class="f"><span>Start</span><input type="date" id="fStart"></label>
+      <label class="f"><span>End</span><input type="date" id="fEnd"></label>
+      <label class="f full"><span>Owner</span><input type="text" id="fOwner" maxlength="80" placeholder="Who is doing it"></label>
+      <label class="f full"><span>Notes</span><textarea id="fNotes" rows="3" maxlength="600"></textarea></label>
+      <label class="chk full"><input type="checkbox" id="fOnDaily"> Include on the daily summary</label>
+    </div>
+    <div class="dlg-err" id="dlgErr" role="alert"></div>
+    <div class="dlg-btns">
+      <button type="button" class="btn danger" id="dlgDelete">Delete</button>
+      <span class="tab-sp"></span>
+      <button type="button" class="btn ghost" id="dlgCancel">Cancel</button>
+      <button type="submit" class="btn pri" id="dlgSave">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<script type="module" src="/js/app.js"></script>
+</body>
+</html>
