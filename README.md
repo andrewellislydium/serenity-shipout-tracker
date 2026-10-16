@@ -49,7 +49,21 @@ To try the table adapter locally, run the [Azurite](https://learn.microsoft.com/
 
 ## Hosting on Azure App Service
 
-Linux web app, Node 24 LTS, Canada Central, Basic B1 or higher with Always On and HTTPS only. App settings: `STORE=table`, `STORAGE_ACCOUNT`, `EDITOR_TOKEN`, `VIEWER_TOKEN`, `SESSION_SECRET`. App Service runs `npm start` (the compiled `dist/server.js`); the GitHub Actions workflow from Deployment Center runs `npm run build`. Health check path: `/healthz`.
+Live (beta): https://serenity-tracker-994ac2-fvghc6gscjexfqav.canadacentral-01.azurewebsites.net
+
+| Resource | Name |
+|---|---|
+| Resource group | `rg-serenity-tracker` (Canada Central) |
+| Web app | `serenity-tracker-994ac2` (Linux, Node 24 LTS) |
+| Storage account | `serenitytracker994ac2` (Table Storage) |
+
+Linux web app, Node 24 LTS, Canada Central. Use Basic B1 or higher with Always On for real use; Free F1 works but sleeps when idle. HTTPS only, minimum TLS 1.2. Health check path: `/healthz`.
+
+App settings: `STORE=table`, `STORAGE_ACCOUNT`, `EDITOR_TOKEN`, `VIEWER_TOKEN`, `SESSION_SECRET`, `TZ=America/Edmonton`, `SCM_DO_BUILD_DURING_DEPLOYMENT=false`. The web app's system assigned identity needs **Storage Table Data Contributor** on the storage account.
+
+Deploys: every push to `main` runs `.github/workflows/main_serenity-tracker-994ac2.yml`, which builds on GitHub, prunes dev dependencies and deploys a zip of the runtime files. App Service then runs `npm start`. Work on `dev` and merge to `main` to release.
+
+If the site shows "The tracker is not available yet", the message gives the reason (missing setting, storage access, and so on). The app keeps retrying storage, so fixing a permission recovers it without a restart.
 
 Note: SPEC.md says Node 20 LTS, which reached end of life in April 2026, so the app targets Node 24 LTS. It still runs on 20.12+.
 

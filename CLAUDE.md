@@ -8,4 +8,5 @@ Ship-out readiness tracker for Serenity Power (client facing, maintained by Lydi
 - Local dev: `npm run dev` on port 5190. Live data is in data/tracker.json (git ignored); delete it to reseed from data/tracker-state.json.
 - STORE=table is the Azure Table Storage adapter (managed identity in Azure, Azurite locally via AZURE_STORAGE_CONNECTION_STRING=UseDevelopmentStorage=true).
 - Runtime target is Node 24 LTS (SPEC says 20, which is end of life). Keep code compatible with 20.12+.
-- Status: milestones 1 to 7 done; table adapter done; Azure App Service setup in progress via the portal.
+- Live beta on Azure App Service (see README Hosting section). Pushing to main deploys to the live site, so work on dev and merge to main only to release.
+- Status: milestones 1 to 8 done. Entra ID sign-in (SPEC 3.2) not started.
